@@ -1,0 +1,127 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Giỏ hàng</title>
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+
+    <style>
+        body {
+            padding: 20px;
+            background: #f5fff8
+        }
+
+        .cart-item {
+            background: #fff;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            box-shadow: 0 0 8px #ddd;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h2>🛒 GIỎ HÀNG</h2>
+
+    <div id="cartList"></div>
+
+    <h4>Tổng tiền: <span id="total">0</span> đ</h4>
+
+    <button class="btn btn-success" onclick="checkout()">Đặt hàng</button>
+
+    <script>
+
+        let cart = [];
+
+        window.onload = function () {
+            cart = JSON.parse(localStorage.getItem("cart")) || [];
+            render();
+        };
+
+        function render() {
+
+            $("#cartList").html("");
+
+            if (cart.length === 0) {
+                $("#cartList").html("Giỏ hàng trống");
+                $("#total").text(0);
+                return;
+            }
+
+            let total = 0;
+
+            cart.forEach((item, i) => {
+
+                total += item.price * item.quantity;
+
+                $("#cartList").append(`
+                <div class="cart-item">
+                    <b>${item.name}</b><br>
+                    Giá: ${item.price}<br>
+                    SL: ${item.quantity}<br><br>
+
+                    <button class="btn btn-danger btn-sm"
+                        onclick="removeItem(${i})">
+                        Xóa
+                    </button>
+                </div>
+            `);
+
+            });
+
+            $("#total").text(total);
+        }
+
+        function removeItem(i) {
+
+            if (!confirm("Xóa sản phẩm?")) return;
+
+            cart.splice(i, 1);
+
+            localStorage.setItem("cart", JSON.stringify(cart));
+
+            render();
+        }
+
+        function checkout() {
+
+            if (cart.length === 0) {
+                alert("Giỏ hàng trống!");
+                return;
+            }
+
+            let orders = JSON.parse(localStorage.getItem("orders")) || [];
+
+            let total = cart.reduce((s, i) => s + i.price * i.quantity, 0);
+
+            let user = localStorage.getItem("currentUser") || "Khách lẻ";
+
+            let order = {
+                id: Date.now(),
+                customer: user,
+                phone: "000000",
+                items: cart,
+                total: total,
+                status: "Chờ xác nhận",
+                date: new Date().toLocaleString()
+            };
+
+            orders.push(order);
+
+            localStorage.setItem("orders", JSON.stringify(orders));
+
+            localStorage.removeItem("cart");
+
+            alert("Đặt hàng thành công!");
+
+            window.location.href = "orders.html";
+        }
+
+    </script>
+
+</body>
+</html>
