@@ -1,0 +1,115 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Nympha</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: #f4f7f6;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: sans-serif;
+        }
+
+        .auth-box {
+            width: 100%;
+            max-width: 400px;
+            padding: 30px;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .btn-tree {
+            background: #ffb5b5;
+            color: white;
+            border: none;
+            transition: 0.3s;
+        }
+
+            .btn-tree:hover {
+                background: #3e5a39;
+                color: white;
+            }
+
+        .toggle-link {
+            color: #52734D;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="auth-box">
+        <!-- FORM ĐĂNG NHẬP -->
+        <div id="login-form">
+            <h2 class="text-center mb-4" style="color: #52734D;">ĐĂNG NHẬP</h2>
+            <input type="text" id="login-user" class="form-control mb-3" placeholder="Tên đăng nhập">
+            <input type="password" id="login-pass" class="form-control mb-3" placeholder="Mật khẩu">
+            <button id="btnLogin" class="btn btn-tree w-100 mb-3">VÀO HỆ THỐNG</button>
+            <p class="text-center small">Chưa có tài khoản? <span class="toggle-link" id="show-reg">Đăng ký ngay</span></p>
+        </div>
+
+        <!-- FORM ĐĂNG KÝ -->
+        <div id="register-form" style="display: none;">
+            <h2 class="text-center mb-4" style="color: #52734D;">ĐĂNG KÝ ADMIN</h2>
+            <input type="text" id="reg-user" class="form-control mb-3" placeholder="Tạo tên đăng nhập">
+            <input type="password" id="reg-pass" class="form-control mb-3" placeholder="Tạo mật khẩu">
+            <button id="btnRegister" class="btn btn-tree w-100 mb-3">TẠO TÀI KHOẢN</button>
+            <p class="text-center small">Đã có tài khoản? <span class="toggle-link" id="show-login">Quay lại đăng nhập</span></p>
+        </div>
+
+        <div id="msg" class="text-center mt-2 small"></div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+    $(document).ready(function () {
+            $('#show-reg').click(function () { $('#login-form').hide(); $('#register-form').show(); $('#msg').text(''); });
+            $('#show-login').click(function () { $('#register-form').hide(); $('#login-form').show(); $('#msg').text(''); });
+
+            $('#btnRegister').click(function () {
+                let user = $('#reg-user').val();
+                let pass = $('#reg-pass').val();
+
+                if (user == "" || pass == "") {
+                    $('#msg').attr('class', 'text-danger').text("Vui lòng điền đủ thông tin!");
+                    return;
+                }
+
+                let users = JSON.parse(localStorage.getItem("users_list")) || [];
+                if (users.some(u => u.username === user)) {
+                    $('#msg').attr('class', 'text-danger').text("Tên đăng nhập đã tồn tại!");
+                } else {
+                    users.push({ username: user, password: pass });
+                    localStorage.setItem("users_list", JSON.stringify(users));
+                    $('#msg').attr('class', 'text-success').text("Đăng ký thành công! Hãy đăng nhập.");
+                    setTimeout(() => { $('#show-login').click(); }, 1500);
+                }
+            });
+
+
+            $('#btnLogin').click(function () {
+                let user = $('#login-user').val();
+                let pass = $('#login-pass').val();
+                let users = JSON.parse(localStorage.getItem("users_list")) || [];
+
+                // Kiểm tra trong danh sách đã đăng ký
+                let found = users.find(u => u.username === user && u.password === pass);
+
+                if (found) {
+
+                    sessionStorage.setItem("admin_login", "true");
+                    window.location.href = "index.html";
+                } else {
+                    $('#msg').attr('class', 'text-danger').text("Sai tài khoản hoặc mật khẩu!");
+                }
+            });
+        });
+    </script>
+</body>
+</html>

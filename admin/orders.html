@@ -1,0 +1,122 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Quản lý đơn hàng</title>
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+
+    <style>
+        .badge-status {
+            padding: 5px 10px;
+            color: #fff;
+            border-radius: 5px;
+        }
+
+        .pending {
+            background: orange;
+        }
+
+        .shipping {
+            background: blue;
+        }
+
+        .done {
+            background: green;
+        }
+    </style>
+</head>
+
+<body class="p-3">
+
+    <h3>📦 QUẢN LÝ ĐƠN HÀNG</h3>
+
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Khách</th>
+                <th>Sản phẩm</th>
+                <th>Tổng</th>
+                <th>Trạng thái</th>
+                <th>Hành động</th>
+            </tr>
+        </thead>
+
+        <tbody id="orderTable"></tbody>
+    </table>
+
+    <script>
+
+        let orders = JSON.parse(localStorage.getItem("orders")) || [];
+
+        function render() {
+
+            $("#orderTable").html("");
+
+            if (orders.length === 0) {
+                $("#orderTable").html("<tr><td colspan='6'>Chưa có đơn hàng</td></tr>");
+                return;
+            }
+
+            orders.forEach((o, i) => {
+
+                let products = o.items.map(p =>
+                    `<div>${p.name} x${p.quantity}</div>`
+                ).join("");
+
+                $("#orderTable").append(`
+                <tr>
+                    <td>${i + 1}</td>
+                    <td>${o.customer}</td>
+                    <td>${products}</td>
+                    <td>${o.total}</td>
+                    <td>
+                        <span class="badge-status ${getClass(o.status)}">
+                            ${o.status}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn btn-warning btn-sm" onclick="ship(${i})">Giao</button>
+                        <button class="btn btn-success btn-sm" onclick="done(${i})">Đã giao</button>
+                        <button class="btn btn-danger btn-sm" onclick="del(${i})">Xóa</button>
+                    </td>
+                </tr>
+            `);
+            });
+        }
+
+        function getClass(s) {
+            if (s === "Chờ xác nhận") return "pending";
+            if (s === "Đang giao hàng") return "shipping";
+            if (s === "Đã giao hàng") return "done";
+            return "pending";
+        }
+
+        function ship(i) {
+            orders[i].status = "Đang giao hàng";
+            save();
+        }
+
+        function done(i) {
+            orders[i].status = "Đã giao hàng";
+            save();
+        }
+
+        function del(i) {
+            orders.splice(i, 1);
+            save();
+        }
+
+        function save() {
+            localStorage.setItem("orders", JSON.stringify(orders));
+            render();
+        }
+
+        render();
+
+    </script>
+
+</body>
+</html>
